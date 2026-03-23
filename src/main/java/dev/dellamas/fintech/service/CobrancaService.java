@@ -30,7 +30,8 @@ public class CobrancaService {
 
     public List<Cobranca> listarVencidas() {
         return cobrancas.values().stream()
-                .filter(c -> c.getVencimento().isBefore(LocalDate.now()) && c.getStatus() == StatusCobranca.PENDENTE)
+                .filter(c -> c.getVencimento().isBefore(LocalDate.now()))
+                .filter(c -> c.getStatus() == StatusCobranca.PENDENTE || c.getStatus() == StatusCobranca.VENCIDA)
                 .collect(Collectors.toList());
     }
 
