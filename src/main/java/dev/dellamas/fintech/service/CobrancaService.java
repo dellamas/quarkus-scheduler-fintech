@@ -47,9 +47,12 @@ public class CobrancaService {
     }
 
     public int processarPendentes() {
-        List<Cobranca> pendentes = listarPendentes();
-        pendentes.forEach(c -> c.setStatus(StatusCobranca.PROCESSANDO));
-        return pendentes.size();
+        List<Cobranca> elegiveis = cobrancas.values().stream()
+                .filter(c -> c.getStatus() == StatusCobranca.PENDENTE)
+                .filter(c -> !c.getVencimento().isBefore(LocalDate.now()))
+                .collect(Collectors.toList());
+        elegiveis.forEach(c -> c.setStatus(StatusCobranca.PROCESSANDO));
+        return elegiveis.size();
     }
 
     public BigDecimal totalVencido() {
