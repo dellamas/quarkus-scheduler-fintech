@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -30,6 +31,8 @@ public class CobrancaService {
 
     public List<Cobranca> listarVencidas() {
         return cobrancas.values().stream()
+                .filter(Objects::nonNull)
+                .filter(c -> c.getVencimento() != null)
                 .filter(c -> c.getVencimento().isBefore(LocalDate.now()))
                 .filter(c -> c.getStatus() == StatusCobranca.PENDENTE || c.getStatus() == StatusCobranca.VENCIDA)
                 .collect(Collectors.toList());
@@ -37,6 +40,7 @@ public class CobrancaService {
 
     public List<Cobranca> listarPendentes() {
         return cobrancas.values().stream()
+                .filter(Objects::nonNull)
                 .filter(c -> c.getStatus() == StatusCobranca.PENDENTE)
                 .collect(Collectors.toList());
     }
@@ -49,7 +53,9 @@ public class CobrancaService {
 
     public int processarPendentes() {
         List<Cobranca> elegiveis = cobrancas.values().stream()
+                .filter(Objects::nonNull)
                 .filter(c -> c.getStatus() == StatusCobranca.PENDENTE)
+                .filter(c -> c.getVencimento() != null)
                 .filter(c -> !c.getVencimento().isBefore(LocalDate.now()))
                 .collect(Collectors.toList());
         elegiveis.forEach(c -> c.setStatus(StatusCobranca.PROCESSANDO));
@@ -58,8 +64,10 @@ public class CobrancaService {
 
     public BigDecimal totalVencido() {
         return cobrancas.values().stream()
+                .filter(Objects::nonNull)
                 .filter(c -> c.getStatus() == StatusCobranca.VENCIDA)
                 .map(Cobranca::getValor)
+                .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
